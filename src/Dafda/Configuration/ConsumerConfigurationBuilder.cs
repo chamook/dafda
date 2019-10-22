@@ -17,5 +17,10 @@ namespace Dafda.Configuration
         {
             return WithConfiguration(ConfigurationKey.GroupId, groupId);
         }
+
+        public ConsumerConfigurationBuilder WithEnableAutoCommit(bool enableAutoCommit)
+        {
+            return WithConfiguration(ConfigurationKey.EnableAutoCommit, enableAutoCommit ? "true" : "false");
+        }
     }
 }

@@ -11,9 +11,9 @@ namespace Dafda.Tests.Configuration
         public void Can_register_message_handler()
         {
             var sut = new ConsumerBuilder();
-            sut.WithConfiguration(x=>x
-                    .WithGroupId("foo")
-                    .WithBootstrapServers("bar")
+            sut.WithConfiguration(x => x
+                .WithGroupId("foo")
+                .WithBootstrapServers("bar")
             );
             sut.RegisterMessageHandler<DummyMessage, DummyMessageHandler>("dummyTopic", nameof(DummyMessage));
 
@@ -22,39 +22,6 @@ namespace Dafda.Tests.Configuration
             var registration = configuration.MessageHandlerRegistry.GetRegistrationFor(nameof(DummyMessage));
 
             Assert.Equal(typeof(DummyMessageHandler), registration.HandlerInstanceType);
-        }
-
-        [Fact]
-        public void returns_expected_auto_commit_when_not_set()
-        {
-            var sut = new ConsumerBuilder();
-            sut.WithConfiguration( x => x
-                    .WithGroupId("foo")
-                    .WithBootstrapServers("bar")
-            );
-
-            var configuration = sut.Build();
-
-            Assert.True(configuration.EnableAutoCommit);
-        }
-
-        [Theory]
-        [InlineData("true", true)]
-        [InlineData("TRUE", true)]
-        [InlineData("false", false)]
-        [InlineData("FALSE", false)]
-        public void returns_expected_auto_commit_when_configured_with_valid_value(string configValue, bool expected)
-        {
-            var sut = new ConsumerBuilder();
-            sut.WithConfiguration(x => x
-                    .WithGroupId("foo")
-                    .WithBootstrapServers("bar")
-                    .WithConfiguration(ConfigurationKey.EnableAutoCommit, configValue)
-            );
-
-            var configuration = sut.Build();
-
-            Assert.Equal(expected, configuration.EnableAutoCommit);
         }
 
         public class DummyMessage

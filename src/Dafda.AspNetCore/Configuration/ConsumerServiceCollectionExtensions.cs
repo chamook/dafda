@@ -37,7 +37,6 @@ namespace Dafda.Configuration
             public IMessageHandlerRegistry MessageHandlerRegistry => _inner.MessageHandlerRegistry;
             public IHandlerUnitOfWorkFactory UnitOfWorkFactory => _provider.GetRequiredService<IHandlerUnitOfWorkFactory>();
             public ITopicSubscriberScopeFactory TopicSubscriberScopeFactory => _inner.TopicSubscriberScopeFactory;
-            public bool EnableAutoCommit => _inner.EnableAutoCommit;
             public IEnumerable<string> SubscribedTopics => _inner.SubscribedTopics;
         }
     }

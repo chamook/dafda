@@ -12,7 +12,9 @@ namespace Dafda.Tests.Builders
         private IHandlerUnitOfWorkFactory _unitOfWorkFactory;
         private ITopicSubscriberScopeFactory _topicSubscriberScopeFactory;
         private MessageRegistration[] _messageRegistrations;
-        private bool _enableAutoCommit;
+        private ConsumerConfigurationBuilder _configurationBuilder = new ConsumerConfigurationBuilder()
+            .WithGroupId("foo")
+            .WithBootstrapServers("bar");
 
         public ConsumerBuilder()
         {
@@ -44,7 +46,7 @@ namespace Dafda.Tests.Builders
 
         public ConsumerBuilder WithEnableAutoCommit(bool enableAutoCommit)
         {
-            _enableAutoCommit = enableAutoCommit;
+            _configurationBuilder.WithEnableAutoCommit(enableAutoCommit);
             return this;
         }
 
@@ -52,10 +54,10 @@ namespace Dafda.Tests.Builders
         {
             var configuration = new ConsumerConfigurationStub
             {
+                Configuration = _configurationBuilder.Build(),
                 MessageHandlerRegistry = new MessageHandlerRegistryStub(_messageRegistrations),
                 UnitOfWorkFactory = _unitOfWorkFactory,
                 TopicSubscriberScopeFactory = _topicSubscriberScopeFactory,
-                EnableAutoCommit = _enableAutoCommit
             };
 
             return new Consumer(configuration);

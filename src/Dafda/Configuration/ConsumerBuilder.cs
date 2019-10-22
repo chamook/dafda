@@ -68,20 +68,7 @@ namespace Dafda.Configuration
             public IHandlerUnitOfWorkFactory UnitOfWorkFactory { get; }
             public ITopicSubscriberScopeFactory TopicSubscriberScopeFactory { get; }
 
-            public bool EnableAutoCommit
-            {
-                get
-                {
-                    const bool defaultAutoCommitStrategy = true;
-
-                    if (!Configuration.TryGetValue(ConfigurationKey.EnableAutoCommit, out var value))
-                    {
-                        return defaultAutoCommitStrategy;
-                    }
-
-                    return bool.Parse(value);
-                }
-            }
+            public bool EnableAutoCommit => Configuration.EnableAutoCommit;
 
             public IEnumerable<string> SubscribedTopics => MessageHandlerRegistry.GetAllSubscribedTopics();
         }

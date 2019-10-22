@@ -13,7 +13,6 @@ namespace Dafda.Configuration
         
         ITopicSubscriberScopeFactory TopicSubscriberScopeFactory { get; }
         
-        bool EnableAutoCommit { get; }
         IEnumerable<string> SubscribedTopics { get; }
     }
 }

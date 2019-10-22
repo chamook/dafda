@@ -138,5 +138,35 @@ namespace Dafda.Tests.Configuration
 
             Assert.Contains(expected: KeyValue(ConfigurationKey.GroupId, "foo"), configuration);
         }
+        
+        [Fact]
+        public void returns_expected_auto_commit_when_not_set()
+        {
+            var sut = new ConsumerConfigurationBuilder()
+                .WithGroupId("foo")
+                .WithBootstrapServers("bar");
+
+            var configuration = sut.Build();
+
+            Assert.True(configuration.EnableAutoCommit);
+        }
+
+        [Theory]
+        [InlineData("true", true)]
+        [InlineData("TRUE", true)]
+        [InlineData("false", false)]
+        [InlineData("FALSE", false)]
+        public void returns_expected_auto_commit_when_configured_with_valid_value(string configValue, bool expected)
+        {
+            var sut = new ConsumerConfigurationBuilder()
+                .WithGroupId("foo")
+                .WithBootstrapServers("bar")
+                .WithConfiguration(ConfigurationKey.EnableAutoCommit, configValue)
+                ;
+
+            var configuration = sut.Build();
+
+            Assert.Equal(expected, configuration.EnableAutoCommit);
+        }
     }
 }

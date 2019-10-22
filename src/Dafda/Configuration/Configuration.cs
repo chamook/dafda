@@ -12,6 +12,21 @@ namespace Dafda.Configuration
             _configuration = configuration;
         }
 
+        public bool EnableAutoCommit
+        {
+            get
+            {
+                const bool defaultAutoCommitStrategy = true;
+
+                if (!_configuration.TryGetValue(ConfigurationKey.EnableAutoCommit, out var value))
+                {
+                    return defaultAutoCommitStrategy;
+                }
+
+                return bool.Parse(value);
+            }
+        }
+
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
         {
             return _configuration.GetEnumerator();

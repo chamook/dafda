@@ -4,5 +4,6 @@ namespace Dafda.Configuration
 {
     public interface IConfiguration : IEnumerable<KeyValuePair<string, string>>
     {
+        bool EnableAutoCommit { get; }
     }
 }
