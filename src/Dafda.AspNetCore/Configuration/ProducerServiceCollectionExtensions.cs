@@ -14,7 +14,7 @@ namespace Dafda.Configuration
             services.AddSingleton<IProducer>(provider =>
             {
                 var configuration = provider.GetRequiredService<IProducerConfiguration>();
-                var kafkaProducer = configuration.KafkaProducerFactory.CreateProducer(configuration);
+                var kafkaProducer = configuration.KafkaProducerFactory.CreateProducer(configuration.Configuration);
                 return new Producer(kafkaProducer, producerConfiguration.OutgoingMessageRegistry, producerConfiguration.MessageIdGenerator);
             });
         }
@@ -22,9 +22,9 @@ namespace Dafda.Configuration
         private static IProducerConfiguration ConfigureProducerConfiguration(IServiceCollection services, Action<IProducerOptions> options)
         {
             var outgoingMessageRegistry = new OutgoingMessageRegistry();
-            var configurationBuilder = new ProducerConfigurationBuilder();
+            var configurationBuilder = new ProducerBuilder();
             configurationBuilder.WithOutgoingMessageRegistry(outgoingMessageRegistry);
-            var consumerOptions = new ProducerOptions(configurationBuilder, services, outgoingMessageRegistry);
+            var consumerOptions = new ProducerOptions(configurationBuilder,  services, outgoingMessageRegistry);
             options?.Invoke(consumerOptions);
             var producerConfiguration = configurationBuilder.Build();
             return producerConfiguration;

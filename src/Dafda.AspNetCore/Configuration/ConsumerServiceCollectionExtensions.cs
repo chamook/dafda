@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Dafda.Consuming;
 using Dafda.Messaging;
@@ -11,7 +10,7 @@ namespace Dafda.Configuration
     {
         public static void AddConsumer(this IServiceCollection services, Action<IConsumerOptions> options = null)
         {
-            var configurationBuilder = new ConsumerConfigurationBuilder();
+            var configurationBuilder = new ConsumerBuilder();
             var consumerOptions = new ConsumerOptions(configurationBuilder, services);
             consumerOptions.WithUnitOfWorkFactory<ServiceProviderUnitOfWorkFactory>();
             consumerOptions.WithUnitOfWork<ScopedUnitOfWork>();
@@ -34,21 +33,12 @@ namespace Dafda.Configuration
                 _provider = provider;
             }
 
+            public Configuration Configuration => _inner.Configuration;
             public IMessageHandlerRegistry MessageHandlerRegistry => _inner.MessageHandlerRegistry;
             public IHandlerUnitOfWorkFactory UnitOfWorkFactory => _provider.GetRequiredService<IHandlerUnitOfWorkFactory>();
             public ITopicSubscriberScopeFactory TopicSubscriberScopeFactory => _inner.TopicSubscriberScopeFactory;
             public bool EnableAutoCommit => _inner.EnableAutoCommit;
             public IEnumerable<string> SubscribedTopics => _inner.SubscribedTopics;
-
-            public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
-            {
-                return _inner.GetEnumerator();
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return ((IEnumerable) _inner).GetEnumerator();
-            }
         }
     }
 }

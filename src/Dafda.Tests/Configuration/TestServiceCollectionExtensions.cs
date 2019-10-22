@@ -35,8 +35,8 @@ namespace Dafda.Tests.Configuration
             var serviceProvider = services.BuildServiceProvider();
             var configuration = serviceProvider.GetRequiredService<IConsumerConfiguration>();
 
-            Assert.Equal("foo", configuration.FirstOrDefault(x => x.Key == "group.id").Value);
-            Assert.Equal("bar", configuration.FirstOrDefault(x => x.Key == "bootstrap.servers").Value);
+            Assert.Equal("foo", configuration.Configuration.FirstOrDefault(x => x.Key == "group.id").Value);
+            Assert.Equal("bar", configuration.Configuration.FirstOrDefault(x => x.Key == "bootstrap.servers").Value);
         }
 
         [Fact]

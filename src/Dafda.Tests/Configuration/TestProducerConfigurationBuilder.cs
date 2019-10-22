@@ -1,15 +1,31 @@
-using System.Linq;
-using Dafda.Configuration;
-using Dafda.Producing;
 using Dafda.Tests.TestDoubles;
+using Dafda.Configuration;
 using Xunit;
+using static Dafda.Tests.Configuration.TestHelper;
 
 namespace Dafda.Tests.Configuration
 {
     public class TestProducerConfigurationBuilder
     {
         [Fact]
-        public void Can_validate_configuration()
+        public void Test_producer_keys()
+        {
+            Assert.Equal(ConfigurationKey.GetAllProducerKeys(), new ProducerConfigurationBuilder().ConfigurationKeys);
+        }
+
+        [Fact]
+        public void Test_required_producer_keys()
+        {
+            Assert.Equal(new string[]
+            {
+                ConfigurationKey.BootstrapServers,
+            }, new ProducerConfigurationBuilder().RequiredConfigurationKeys);
+        }
+
+        // producer
+
+        [Fact]
+        public void _Can_validate_configuration()
         {
             var sut = new ProducerConfigurationBuilder();
 
@@ -17,132 +33,96 @@ namespace Dafda.Tests.Configuration
         }
 
         [Fact]
-        public void Can_build_minimal_configuration()
+        public void _Can_build_minimal_configuration()
         {
-            var sut = new ProducerConfigurationBuilder();
-            sut.WithBootstrapServers("bar");
+            var configuration = new ProducerConfigurationBuilder()
+                .WithBootstrapServers("bar")
+                .Build();
 
-            var configuration = sut.Build();
-
-            AssertKeyValue(configuration, ConfigurationKey.BootstrapServers, "bar");
-        }
-
-        private static void AssertKeyValue(IConfiguration configuration, string expectedKey, string expectedValue)
-        {
-            configuration.FirstOrDefault(x => x.Key == expectedKey).Deconstruct(out _, out var actualValue);
-
-            Assert.Equal(expectedValue, actualValue);
+            Assert.Contains(expected: KeyValue(ConfigurationKey.BootstrapServers, "bar"), configuration);
         }
 
         [Fact]
-        public void Can_ignore_out_of_scope_values_from_configuration_source()
+        public void _Can_ignore_out_of_scope_values_from_configuration_source()
         {
-            var sut = new ProducerConfigurationBuilder();
-            sut.WithConfigurationSource(new ConfigurationSourceStub(
-                (key: ConfigurationKey.BootstrapServers, value: "bar"),
-                (key: "dummy", value: "baz")
-            ));
+            var configuration = new ProducerConfigurationBuilder()
+                .WithConfigurationSource(
+                    new ConfigurationSourceStub(
+                        (key: ConfigurationKey.BootstrapServers, value: "bar"),
+                        (key: "dummy", value: "baz")
+                    ))
+                .Build();
 
-            var configuration = sut.Build();
-
-            AssertKeyValue(configuration, "dummy", null);
+            Assert.DoesNotContain(KeyValue("dummy", "baz"), configuration);
         }
 
         [Fact]
-        public void Can_use_configuration_value_from_source()
+        public void _Can_use_configuration_value_from_source()
         {
-            var sut = new ProducerConfigurationBuilder();
-            sut.WithConfigurationSource(new ConfigurationSourceStub(
-                (key: ConfigurationKey.BootstrapServers, value: "bar")
-            ));
+            var configuration = new ProducerConfigurationBuilder()
+                .WithConfigurationSource(
+                    new ConfigurationSourceStub(
+                        (key: ConfigurationKey.BootstrapServers, value: "bar")
+                    ))
+                .Build();
 
-            var configuration = sut.Build();
-
-            AssertKeyValue(configuration, ConfigurationKey.BootstrapServers, "bar");
+            Assert.Contains(expected: KeyValue(ConfigurationKey.BootstrapServers, "bar"), configuration);
         }
 
         [Fact]
-        public void Can_use_configuration_value_from_source_with_environment_naming_convention()
+        public void _Can_use_configuration_value_from_source_with_environment_naming_convention()
         {
-            var sut = new ProducerConfigurationBuilder();
-            sut.WithConfigurationSource(new ConfigurationSourceStub(
-                (key: "BOOTSTRAP_SERVERS", value: "bar")
-            ));
-            sut.WithEnvironmentStyle();
+            var configuration = new ProducerConfigurationBuilder()
+                .WithConfigurationSource(
+                    new ConfigurationSourceStub(
+                        (key: "BOOTSTRAP_SERVERS", value: "bar")))
+                .WithEnvironmentStyle()
+                .Build();
 
-            var configuration = sut.Build();
-
-            AssertKeyValue(configuration, ConfigurationKey.BootstrapServers, "bar");
+            Assert.Contains(expected: KeyValue(ConfigurationKey.BootstrapServers, "bar"), configuration);
         }
 
         [Fact]
-        public void Can_use_configuration_value_from_source_with_environment_naming_convention_and_prefix()
+        public void _Can_use_configuration_value_from_source_with_environment_naming_convention_and_prefix()
         {
-            var sut = new ProducerConfigurationBuilder();
-            sut.WithConfigurationSource(new ConfigurationSourceStub(
-                (key: "DEFAULT_KAFKA_BOOTSTRAP_SERVERS", value: "bar")
-            ));
-            sut.WithEnvironmentStyle("DEFAULT_KAFKA");
+            var configuration = new ProducerConfigurationBuilder()
+                .WithConfigurationSource(
+                    new ConfigurationSourceStub(
+                        (key: "DEFAULT_KAFKA_BOOTSTRAP_SERVERS", value: "bar")
+                    ))
+                .WithEnvironmentStyle("DEFAULT_KAFKA")
+                .Build();
 
-            var configuration = sut.Build();
-
-            AssertKeyValue(configuration, ConfigurationKey.BootstrapServers, "bar");
+            Assert.Contains(expected: KeyValue(ConfigurationKey.BootstrapServers, "bar"), configuration);
         }
 
         [Fact]
-        public void Can_overwrite_values_from_source()
+        public void _Can_overwrite_values_from_source()
         {
-            var sut = new ProducerConfigurationBuilder();
-            sut.WithConfigurationSource(new ConfigurationSourceStub(
-                (key: ConfigurationKey.BootstrapServers, value: "foo")
-            ));
-            sut.WithConfiguration(ConfigurationKey.BootstrapServers, "bar");
+            var configuration = new ProducerConfigurationBuilder()
+                .WithConfigurationSource(
+                    new ConfigurationSourceStub(
+                        (key: ConfigurationKey.BootstrapServers, value: "foo")
+                    ))
+                .WithConfiguration(ConfigurationKey.BootstrapServers, "bar")
+                .Build();
 
-            var configuration = sut.Build();
-
-            AssertKeyValue(configuration, ConfigurationKey.BootstrapServers, "bar");
+            Assert.Contains(expected: KeyValue(ConfigurationKey.BootstrapServers, "bar"), configuration);
         }
 
         [Fact]
-        public void Only_take_value_from_first_source_that_matches()
+        public void _Only_take_value_from_first_source_that_matches()
         {
-            var sut = new ProducerConfigurationBuilder();
-            sut.WithConfigurationSource(new ConfigurationSourceStub(
-                (key: ConfigurationKey.BootstrapServers, value: "foo"),
-                (key: "BOOTSTRAP_SERVERS", value: "bar")
-            ));
-            sut.WithNamingConvention(NamingConvention.Default);
-            sut.WithEnvironmentStyle();
+            var configuration = new ProducerConfigurationBuilder().WithConfigurationSource(
+                    new ConfigurationSourceStub(
+                        (key: ConfigurationKey.BootstrapServers, value: "foo"),
+                        (key: "BOOTSTRAP_SERVERS", value: "bar")
+                    ))
+                .WithNamingConvention(NamingConvention.Default)
+                .WithEnvironmentStyle()
+                .Build();
 
-            var configuration = sut.Build();
-
-            AssertKeyValue(configuration, ConfigurationKey.BootstrapServers, "foo");
-        }
-
-        [Fact]
-        public void Has_expected_message_id_generator()
-        {
-            var dummy = MessageIdGenerator.Default;
-
-            var sut = new ProducerConfigurationBuilder();
-            sut.WithBootstrapServers("foo");
-            sut.WithMessageIdGenerator(dummy);
-            var producerConfiguration = sut.Build();
-
-            Assert.Equal(dummy, producerConfiguration.MessageIdGenerator);
-        }
-
-        [Fact]
-        public void Has_expected_outgoing_message_registry()
-        {
-            var dummy = new OutgoingMessageRegistry();
-
-            var sut = new ProducerConfigurationBuilder();
-            sut.WithBootstrapServers("foo");
-            sut.WithOutgoingMessageRegistry(dummy);
-            var producerConfiguration = sut.Build();
-
-            Assert.Equal(dummy, producerConfiguration.OutgoingMessageRegistry);
+            Assert.Contains(expected: KeyValue(ConfigurationKey.BootstrapServers, "foo"), configuration);
         }
     }
 }

@@ -27,10 +27,10 @@ namespace Dafda.Configuration
 
     internal class ConsumerOptions : IConsumerOptions
     {
-        private readonly ConsumerConfigurationBuilder _builder;
+        private readonly ConsumerBuilder _builder;
         private readonly IServiceCollection _services;
 
-        public ConsumerOptions(ConsumerConfigurationBuilder builder, IServiceCollection services)
+        public ConsumerOptions(ConsumerBuilder builder, IServiceCollection services)
         {
             _services = services;
             _builder = builder;
@@ -38,37 +38,37 @@ namespace Dafda.Configuration
 
         public void WithConfigurationSource(ConfigurationSource configurationSource)
         {
-            _builder.WithConfigurationSource(configurationSource);
+            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithConfigurationSource(configurationSource));
         }
 
         public void WithConfigurationSource(Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
-            _builder.WithConfigurationSource(new DefaultConfigurationSource(configuration));
+            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithConfigurationSource(new DefaultConfigurationSource(configuration)));
         }
 
         public void WithNamingConvention(NamingConvention namingConvention)
         {
-            _builder.WithNamingConvention(namingConvention);
+            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithNamingConvention(namingConvention));
         }
 
         public void WithEnvironmentStyle(string prefix = null, params string[] additionalPrefixes)
         {
-            _builder.WithEnvironmentStyle(prefix, additionalPrefixes);
+            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithEnvironmentStyle(prefix, additionalPrefixes));
         }
 
         public void WithConfiguration(string key, string value)
         {
-            _builder.WithConfiguration(key, value);
+            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithConfiguration(key, value));
         }
 
         public void WithGroupId(string groupId)
         {
-            _builder.WithGroupId(groupId);
+            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithGroupId(groupId));
         }
 
         public void WithBootstrapServers(string bootstrapServers)
         {
-            _builder.WithBootstrapServers(bootstrapServers);
+            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithBootstrapServers(bootstrapServers));
         }
 
         public void WithUnitOfWorkFactory<T>() where T : class, IHandlerUnitOfWorkFactory

@@ -4,8 +4,10 @@ using Dafda.Messaging;
 
 namespace Dafda.Configuration
 {
-    public interface IConsumerConfiguration : IConfiguration
+    public interface IConsumerConfiguration
     {
+        Configuration Configuration { get; }
+
         IMessageHandlerRegistry MessageHandlerRegistry { get; }
         IHandlerUnitOfWorkFactory UnitOfWorkFactory { get; }
         

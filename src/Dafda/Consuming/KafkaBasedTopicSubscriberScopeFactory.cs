@@ -7,7 +7,7 @@ namespace Dafda.Consuming
     {
         public TopicSubscriberScope CreateTopicSubscriberScope(IConsumerConfiguration configuration)
         {
-            var consumer = new ConsumerBuilder<string, string>(configuration).Build();
+            var consumer = new ConsumerBuilder<string, string>(configuration.Configuration).Build();
             consumer.Subscribe(configuration.SubscribedTopics);
 
             return new KafkaConsumerScope(consumer);

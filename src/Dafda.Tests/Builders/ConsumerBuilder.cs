@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using Dafda.Configuration;
 using Dafda.Consuming;
@@ -66,16 +65,7 @@ namespace Dafda.Tests.Builders
 
         private class ConsumerConfigurationStub : IConsumerConfiguration
         {
-            public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
-            {
-                throw new NotImplementedException();
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return GetEnumerator();
-            }
-
+            public Dafda.Configuration.Configuration Configuration { get; set; }
             public IMessageHandlerRegistry MessageHandlerRegistry { get; set; }
             public IHandlerUnitOfWorkFactory UnitOfWorkFactory { get; set; }
             public ITopicSubscriberScopeFactory TopicSubscriberScopeFactory { get; set; }
