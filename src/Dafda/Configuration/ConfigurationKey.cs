@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -51,17 +50,19 @@ namespace Dafda.Configuration
             return _key;
         }
 
-        public static ConfigurationKey[] GetAllConsumerKeys()
+        public static string[] GetAllConsumerKeys()
         {
             return AllConfigurationKeys.Value
                 .Where(x => x._isConsumer)
+                .Select(x => x._key)
                 .ToArray();
         }
 
-        public static ConfigurationKey[] GetAllProducerKeys()
+        public static string[] GetAllProducerKeys()
         {
             return AllConfigurationKeys.Value
                 .Where(x => x._isProducer)
+                .Select(x => x._key)
                 .ToArray();
         }
 

@@ -13,7 +13,7 @@ namespace Dafda.Tests.Configuration
             Assert.Equal(expected, actual);
         }
 
-        public static IEnumerable<object[]> Data => new List<object[]>
+        public static IEnumerable<object[]> Data => new List<string[]>
         {
             new[] {"group.id", ConfigurationKey.GroupId},
             new[] {"enable.auto.commit", ConfigurationKey.EnableAutoCommit},
@@ -30,7 +30,7 @@ namespace Dafda.Tests.Configuration
         [Fact]
         public void Has_all_consumer_configuration_keys()
         {
-            Assert.Equal(new[]
+            Assert.Equal(new string[]
             {
                 ConfigurationKey.GroupId,
                 ConfigurationKey.EnableAutoCommit,
@@ -48,7 +48,7 @@ namespace Dafda.Tests.Configuration
         [Fact]
         public void Has_all_provider_configuration_keys()
         {
-            Assert.Equal(new[]
+            Assert.Equal(new string[]
             {
                 ConfigurationKey.BootstrapServers,
                 ConfigurationKey.BrokerVersionFallback,
