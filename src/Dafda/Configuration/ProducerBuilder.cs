@@ -46,7 +46,7 @@ namespace Dafda.Configuration
 
         private class ProducerConfiguration : IProducerConfiguration
         {
-            public ProducerConfiguration(Configuration configuration, MessageIdGenerator messageIdGenerator, IOutgoingMessageRegistry outgoingMessageRegistry, IKafkaProducerFactory kafkaProducerFactory)
+            public ProducerConfiguration(IConfiguration configuration, MessageIdGenerator messageIdGenerator, IOutgoingMessageRegistry outgoingMessageRegistry, IKafkaProducerFactory kafkaProducerFactory)
             {
                 Configuration = configuration;
                 MessageIdGenerator = messageIdGenerator;
@@ -54,7 +54,7 @@ namespace Dafda.Configuration
                 KafkaProducerFactory = kafkaProducerFactory;
             }
 
-            public Configuration Configuration { get; }
+            public IConfiguration Configuration { get; }
             public MessageIdGenerator MessageIdGenerator { get; }
             public IOutgoingMessageRegistry OutgoingMessageRegistry { get; }
             public IKafkaProducerFactory KafkaProducerFactory { get; }

@@ -1,4 +1,5 @@
-﻿using Dafda.Configuration;
+﻿using System.Collections.Generic;
+using Dafda.Configuration;
 using Dafda.Consuming;
 
 namespace Dafda.Tests.TestDoubles

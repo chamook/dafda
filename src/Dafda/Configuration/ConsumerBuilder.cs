@@ -54,7 +54,7 @@ namespace Dafda.Configuration
 
         private class ConsumerConfiguration : IConsumerConfiguration
         {
-            public ConsumerConfiguration(Configuration configuration, IMessageHandlerRegistry messageHandlerRegistry,
+            public ConsumerConfiguration(IConfiguration configuration, IMessageHandlerRegistry messageHandlerRegistry,
                 IHandlerUnitOfWorkFactory unitOfWorkFactory, ITopicSubscriberScopeFactory topicSubscriberScopeFactory)
             {
                 Configuration = configuration;
@@ -63,7 +63,7 @@ namespace Dafda.Configuration
                 TopicSubscriberScopeFactory = topicSubscriberScopeFactory;
             }
 
-            public Configuration Configuration { get; }
+            public IConfiguration Configuration { get; }
             public IMessageHandlerRegistry MessageHandlerRegistry { get; }
             public IHandlerUnitOfWorkFactory UnitOfWorkFactory { get; }
             public ITopicSubscriberScopeFactory TopicSubscriberScopeFactory { get; }

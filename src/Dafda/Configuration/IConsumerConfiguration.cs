@@ -6,7 +6,7 @@ namespace Dafda.Configuration
 {
     public interface IConsumerConfiguration
     {
-        Configuration Configuration { get; }
+        IConfiguration Configuration { get; }
 
         IMessageHandlerRegistry MessageHandlerRegistry { get; }
         IHandlerUnitOfWorkFactory UnitOfWorkFactory { get; }

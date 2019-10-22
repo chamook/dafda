@@ -67,7 +67,7 @@ namespace Dafda.Tests.Builders
 
         private class ConsumerConfigurationStub : IConsumerConfiguration
         {
-            public Dafda.Configuration.Configuration Configuration { get; set; }
+            public IConfiguration Configuration { get; set; }
             public IMessageHandlerRegistry MessageHandlerRegistry { get; set; }
             public IHandlerUnitOfWorkFactory UnitOfWorkFactory { get; set; }
             public ITopicSubscriberScopeFactory TopicSubscriberScopeFactory { get; set; }

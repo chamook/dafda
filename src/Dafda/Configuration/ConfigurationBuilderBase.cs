@@ -48,7 +48,7 @@ namespace Dafda.Configuration
             return (T) this;
         }
 
-        public Configuration Build()
+        public IConfiguration Build()
         {
             BuildConfiguration();
 
