@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Dafda.Messaging
 {
-    internal class ServiceProviderUnitOfWorkFactory : IHandlerUnitOfWorkFactory
+    public class ServiceProviderUnitOfWorkFactory : IHandlerUnitOfWorkFactory
     {
         private readonly IServiceProvider _serviceProvider;
 
@@ -15,20 +15,20 @@ namespace Dafda.Messaging
 
         public IHandlerUnitOfWork CreateForHandlerType(Type handlerType)
         {
-            return new ServiceScopedUnitOfWork(_serviceProvider, handlerType, _serviceProvider.GetRequiredService<ScopedUnitOfWork>());
+            return new ServiceScopedUnitOfWork(_serviceProvider, handlerType, ExecuteInScope);
         }
 
         private class ServiceScopedUnitOfWork : IHandlerUnitOfWork
         {
             private readonly IServiceProvider _serviceProvider;
             private readonly Type _handlerType;
-            private readonly ScopedUnitOfWork _unitOfWork;
+            private readonly Func<IServiceScope, Func<Task>, Task> _executeInScope;
 
-            public ServiceScopedUnitOfWork(IServiceProvider serviceProvider, Type handlerType, ScopedUnitOfWork unitOfWork)
+            public ServiceScopedUnitOfWork(IServiceProvider serviceProvider, Type handlerType, Func<IServiceScope, Func<Task>, Task> executeInScope)
             {
                 _serviceProvider = serviceProvider;
                 _handlerType = handlerType;
-                _unitOfWork = unitOfWork;
+                _executeInScope = executeInScope;
             }
 
             public async Task Run(Func<object, Task> handlingAction)
@@ -37,9 +37,14 @@ namespace Dafda.Messaging
                 {
                     var handlerInstance = scope.ServiceProvider.GetRequiredService(_handlerType);
 
-                    await _unitOfWork.ExecuteInScope(scope, () => handlingAction(handlerInstance));
+                    await _executeInScope(scope, () => handlingAction(handlerInstance));
                 }
             }
+        }
+
+        protected virtual Task ExecuteInScope(IServiceScope scope, Func<Task> execute)
+        {
+            return execute();
         }
     }
 }

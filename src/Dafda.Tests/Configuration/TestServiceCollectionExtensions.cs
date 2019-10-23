@@ -42,6 +42,8 @@ namespace Dafda.Tests.Configuration
         [Fact]
         public async Task Can_consume_message()
         {
+            Scoped.Reset();
+            
             var dummyMessage = new DummyMessage();
             var messageStub = new TransportLevelMessageBuilder()
                 .WithType(nameof(DummyMessage))
@@ -73,6 +75,8 @@ namespace Dafda.Tests.Configuration
         [Fact]
         public async Task Can_consume_message_2()
         {
+            Scoped.Reset();
+
             var dummyMessage = new DummyMessage();
             var messageStub = new TransportLevelMessageBuilder()
                 .WithType(nameof(DummyMessage))
@@ -90,7 +94,7 @@ namespace Dafda.Tests.Configuration
                 options.WithGroupId("dummyGroupId");
                 options.RegisterMessageHandler<DummyMessage, DummyMessageHandler>("dummyTopic", nameof(DummyMessage));
 
-                options.WithUnitOfWork<UnitOfWork>();
+                options.WithUnitOfWorkFactory<ScopedUnitOfWorkFactory>();
 
                 options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(messageResult)));
             });
@@ -102,6 +106,7 @@ namespace Dafda.Tests.Configuration
 
             Assert.Equal(dummyMessage, DummyMessageHandler.LastHandledMessage);
             Assert.Equal(1, Scoped.Instanciated);
+            Assert.Equal(1, Scoped.Disposed);
         }
 
         [Fact]
@@ -222,23 +227,47 @@ namespace Dafda.Tests.Configuration
         }
     }
 
-    public class UnitOfWork : ScopedUnitOfWork
+    public class ScopedUnitOfWorkFactory : ServiceProviderUnitOfWorkFactory
     {
-        public override Task ExecuteInScope(IServiceScope scope, Func<Task> execute)
+        public ScopedUnitOfWorkFactory(IServiceProvider serviceProvider) : base(serviceProvider)
+        {
+        }
+
+        protected override Task ExecuteInScope(IServiceScope scope, Func<Task> execute)
         {
             var scoped = scope.ServiceProvider.GetRequiredService<Scoped>();
 
-            return base.ExecuteInScope(scope, execute);
+            return execute();
+            
+//
+// return base.ExecuteInScope(scope, execute);
         }
     }
 
-    public class Scoped
+    public class Scoped : IDisposable
     {
-        public static int Instanciated { get; set; }
+        public static int Instanciated { get; private set; }
+        public static int Disposed { get; private set; }
+
+        private bool _disposed = false;
 
         public Scoped()
         {
             Instanciated++;
+        }
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+                Disposed++;
+            }
+        }
+
+        public static void Reset()
+        {
+            Instanciated = Disposed = 0;
         }
     }
 
