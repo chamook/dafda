@@ -4,7 +4,7 @@ using Confluent.Kafka;
 using Dafda.Logging;
 using Dafda.Messaging;
 
-namespace Dafda.Consuming
+namespace Dafda.Consuming.Kafka
 {
     internal class KafkaConsumerScope : TopicSubscriberScope
     {

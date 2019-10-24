@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Confluent.Kafka;
 using Dafda.Configuration;
 
-namespace Dafda.Consuming
+namespace Dafda.Consuming.Kafka
 {
     public class KafkaBasedTopicSubscriberScopeFactory : ITopicSubscriberScopeFactory
     {

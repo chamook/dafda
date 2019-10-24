@@ -1,4 +1,5 @@
 using Dafda.Configuration;
+using Dafda.Consuming.Kafka;
 using Dafda.Messaging;
 
 namespace Dafda.Consuming

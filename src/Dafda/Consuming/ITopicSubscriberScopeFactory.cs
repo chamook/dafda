@@ -5,6 +5,6 @@ namespace Dafda.Consuming
 {
     public interface ITopicSubscriberScopeFactory
     {
-        TopicSubscriberScope CreateTopicSubscriberScope(Configuration.IConfiguration configuration, IEnumerable<string> subscribedTopics);
+        TopicSubscriberScope CreateTopicSubscriberScope(IConfiguration configuration, IEnumerable<string> subscribedTopics);
     }
 }
