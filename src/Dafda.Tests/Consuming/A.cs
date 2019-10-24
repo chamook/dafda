@@ -10,12 +10,12 @@ namespace Dafda.Tests.Consuming
         public static MessageHandlerRegistryBuilder MessageHandlerRegistry => new MessageHandlerRegistryBuilder();
         public static TopicSubscriberScopeFactoryBuilder TopicSubscriberScopeFactory => new TopicSubscriberScopeFactoryBuilder();
 
-        public static ConsumerBuilder WithTopicSubscriberScopeFactory(this ConsumerBuilder consumerBuilder, TopicSubscriberScopeFactoryBuilder builder)
+        public static Consumer.Builder WithTopicSubscriberScopeFactory(this Consumer.Builder consumerBuilder, TopicSubscriberScopeFactoryBuilder builder)
         {
             return consumerBuilder.WithTopicSubscriberScopeFactory(builder.Build());
         }
         
-        public static ConsumerBuilder WithConfiguration(this ConsumerBuilder consumerBuilder, ConsumerConfigurationBuilder builder)
+        public static Consumer.Builder WithConfiguration(this Consumer.Builder consumerBuilder, ConsumerConfigurationBuilder builder)
         {
             return consumerBuilder.WithConfiguration(builder.Build());
         }

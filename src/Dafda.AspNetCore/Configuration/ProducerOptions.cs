@@ -22,7 +22,7 @@ namespace Dafda.Configuration
     internal class ProducerOptions : IProducerOptions
     {
         private readonly ProducerConfigurationBuilder _configurationBuilder = new ProducerConfigurationBuilder();
-        private readonly ProducerBuilder _builder = new ProducerBuilder();
+        private readonly Producer.Builder _builder = Producer.Create();
         private readonly IOutgoingMessageRegistry _outgoingMessageRegistry = new OutgoingMessageRegistry();
         private readonly OutboxMessageCollector.Builder _outboxBuilder = OutboxMessageCollector.Create();
 

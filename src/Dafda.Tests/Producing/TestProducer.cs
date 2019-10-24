@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Dafda.Configuration;
+using Dafda.Producing;
 using Dafda.Tests.TestDoubles;
 using Xunit;
 
@@ -12,7 +12,7 @@ namespace Dafda.Tests.Producing
         {
             var spy = new KafkaProducerSpy();
 
-            var sut = new ProducerBuilder()
+            var sut = Producer.Create()
                 .WithKafkaProducerFactory(new KafkaProducerFactoryStub(spy))
                 .WithOutgoingMessageRegistry(A.OutgoingMessageRegistry
                     .Register<Message>("foo", "bar", @event => @event.Id)

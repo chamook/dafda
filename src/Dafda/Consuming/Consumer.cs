@@ -3,18 +3,24 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dafda.Configuration;
+using Dafda.Consuming.Kafka;
 using Dafda.Messaging;
 
 namespace Dafda.Consuming
 {
     public class Consumer
     {
+        public static Builder Create()
+        {
+            return new Builder();
+        }
+
         private readonly IConfiguration _configuration;
         private readonly ITopicSubscriberScopeFactory _topicSubscriberScopeFactory;
         private readonly LocalMessageDispatcher _localMessageDispatcher;
         private readonly IList<string> _subscribedTopics;
 
-        public Consumer(IConfiguration configuration, ITopicSubscriberScopeFactory subscriberScopeFactory, IMessageHandlerRegistry messageHandlerRegistry, IHandlerUnitOfWorkFactory unitOfWorkFactory, IEnumerable<string> subscribedTopics)
+        private Consumer(IConfiguration configuration, ITopicSubscriberScopeFactory subscriberScopeFactory, IMessageHandlerRegistry messageHandlerRegistry, IHandlerUnitOfWorkFactory unitOfWorkFactory, IEnumerable<string> subscribedTopics)
         {
             _localMessageDispatcher = new LocalMessageDispatcher(messageHandlerRegistry, unitOfWorkFactory);
             _topicSubscriberScopeFactory = subscriberScopeFactory;
@@ -51,5 +57,57 @@ namespace Dafda.Consuming
                 await messageResult.Commit();
             }
         }
+
+        #region Builder
+
+        public class Builder
+        {
+            private IConfiguration _configuration = new Configuration.Configuration();
+            private ITopicSubscriberScopeFactory _topicSubscriberScopeFactory = new KafkaBasedTopicSubscriberScopeFactory();
+            private IMessageHandlerRegistry _messageHandlerRegistry = new MessageHandlerRegistry();
+
+            private IHandlerUnitOfWorkFactory _unitOfWorkFactory;
+
+            internal Builder()
+            {
+            }
+
+            public Builder WithConfiguration(IConfiguration configuration)
+            {
+                _configuration = configuration;
+                return this;
+            }
+
+            public Builder WithUnitOfWorkFactory(IHandlerUnitOfWorkFactory factory)
+            {
+                _unitOfWorkFactory = factory;
+                return this;
+            }
+
+            public Builder WithTopicSubscriberScopeFactory(ITopicSubscriberScopeFactory topicSubscriberScopeFactory)
+            {
+                _topicSubscriberScopeFactory = topicSubscriberScopeFactory;
+                return this;
+            }
+
+            public Builder WithMessageHandlerRegistry(IMessageHandlerRegistry messageHandlerRegistry)
+            {
+                _messageHandlerRegistry = messageHandlerRegistry;
+                return this;
+            }
+
+            public Consumer Build()
+            {
+                return new Consumer(
+                    _configuration,
+                    _topicSubscriberScopeFactory,
+                    _messageHandlerRegistry,
+                    _unitOfWorkFactory,
+                    _messageHandlerRegistry.GetAllSubscribedTopics()
+                );
+            }
+        }
+
+        #endregion
     }
 }

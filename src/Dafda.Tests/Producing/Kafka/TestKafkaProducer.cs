@@ -6,14 +6,6 @@ namespace Dafda.Tests.Producing.Kafka
 {
     public class TestKafkaProducer
     {
-        private static OutgoingMessageBuilder EmptyOutgoingMessage =>
-            new OutgoingMessageBuilder()
-                .WithTopic("")
-                .WithMessageId("")
-                .WithKey("")
-                .WithValue("")
-                .WithType("");
-
         [Fact]
         public void Has_expected_message_id_header_name()
         {
@@ -29,7 +21,7 @@ namespace Dafda.Tests.Producing.Kafka
         [Fact]
         public void Message_has_expected_key()
         {
-            var message = KafkaProducer.PrepareOutgoingMessage(EmptyOutgoingMessage.WithKey("dummyKey"));
+            var message = KafkaProducer.PrepareOutgoingMessage(CreateEmptyOutgoingMessage().WithKey("dummyKey").Build());
 
             Assert.Equal("dummyKey", message.Key);
         }
@@ -37,7 +29,7 @@ namespace Dafda.Tests.Producing.Kafka
         [Fact]
         public void Message_has_expected_value()
         {
-            var message = KafkaProducer.PrepareOutgoingMessage(EmptyOutgoingMessage.WithValue("dummyMessage"));
+            var message = KafkaProducer.PrepareOutgoingMessage(CreateEmptyOutgoingMessage().WithValue("dummyMessage").Build());
 
             Assert.Equal("dummyMessage", message.Value);
         }
@@ -45,7 +37,7 @@ namespace Dafda.Tests.Producing.Kafka
         [Fact]
         public void Message_header_has_expected_message_id()
         {
-            var message = KafkaProducer.PrepareOutgoingMessage(EmptyOutgoingMessage.WithMessageId("A"));
+            var message = KafkaProducer.PrepareOutgoingMessage(CreateEmptyOutgoingMessage().WithMessageId("A").Build());
 
             Assert.Equal(new[] {(byte) 'A'}, message.Headers.GetLastBytes(KafkaProducer.MessageIdHeaderName));
         }
@@ -53,9 +45,19 @@ namespace Dafda.Tests.Producing.Kafka
         [Fact]
         public void Message_header_has_expected_type()
         {
-            var message = KafkaProducer.PrepareOutgoingMessage(EmptyOutgoingMessage.WithType("T"));
+            var message = KafkaProducer.PrepareOutgoingMessage(CreateEmptyOutgoingMessage().WithType("T").Build());
 
             Assert.Equal(new[] {(byte) 'T'}, message.Headers.GetLastBytes(KafkaProducer.TypeHeaderName));
+        }
+
+        private static OutgoingMessage.Builder CreateEmptyOutgoingMessage()
+        {
+            return OutgoingMessage.Create()
+                .WithTopic("")
+                .WithMessageId("")
+                .WithKey("")
+                .WithValue("")
+                .WithType("");
         }
     }
 }

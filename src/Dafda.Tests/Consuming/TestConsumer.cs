@@ -24,7 +24,7 @@ namespace Dafda.Tests.Consuming
                 .Register<FooMessage, FooMessageHandler>("foo", "bar")
                 .Build();
 
-            var sut = new ConsumerBuilder()
+            var sut = Consumer.Create()
                 .WithConfiguration(new ConsumerConfigurationBuilder()
                     .WithGroupId("foo.group.id")
                     .WithBootstrapServers("foo.bootstrap.servers")
@@ -42,7 +42,7 @@ namespace Dafda.Tests.Consuming
         [Fact]
         public async Task throws_expected_exception_when_consuming_a_message_without_a_handler_as_been_registered_for_it()
         {
-            var sut = new ConsumerBuilder()
+            var sut = Consumer.Create()
                 .WithConfiguration(new ConsumerConfigurationBuilder()
                     .WithGroupId("foo.group.id")
                     .WithBootstrapServers("foo.bootstrap.servers")
@@ -63,7 +63,7 @@ namespace Dafda.Tests.Consuming
                 .Register<FooMessage, FooMessageHandler>("bar", "foo")
                 .Build();
 
-            var sut = new ConsumerBuilder()
+            var sut = Consumer.Create()
                 .WithConfiguration(new ConsumerConfigurationBuilder()
                     .WithGroupId("foo.group.id")
                     .WithBootstrapServers("foo.bootstrap.servers")
@@ -101,7 +101,7 @@ namespace Dafda.Tests.Consuming
                 .Register<FooMessage, FooMessageHandler>("bar", "foo")
                 .Build();
 
-            var sut = new ConsumerBuilder()
+            var sut = Consumer.Create()
                 .WithConfiguration(new ConsumerConfigurationBuilder()
                     .WithGroupId("foo.group.id")
                     .WithBootstrapServers("foo.bootstrap.servers")
@@ -136,7 +136,7 @@ namespace Dafda.Tests.Consuming
                 .Register<FooMessage, FooMessageHandler>("bar", "foo")
                 .Build();
 
-            var sut = new ConsumerBuilder()
+            var sut = Consumer.Create()
                 .WithConfiguration(new ConsumerConfigurationBuilder()
                     .WithGroupId("foo.group.id")
                     .WithBootstrapServers("foo.bootstrap.servers")

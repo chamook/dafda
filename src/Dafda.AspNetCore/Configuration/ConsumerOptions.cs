@@ -26,7 +26,7 @@ namespace Dafda.Configuration
     internal class ConsumerOptions : IConsumerOptions
     {
         private readonly ConsumerConfigurationBuilder _configurationBuilder = new ConsumerConfigurationBuilder();
-        private readonly ConsumerBuilder _consumerBuilder = new ConsumerBuilder();
+        private readonly Consumer.Builder _consumerBuilder = Consumer.Create();
         private readonly IMessageHandlerRegistry _messageHandlerRegistry = new MessageHandlerRegistry();
 
         private readonly IServiceCollection _services;

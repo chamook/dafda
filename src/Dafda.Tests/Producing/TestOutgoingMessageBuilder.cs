@@ -11,7 +11,7 @@ namespace Dafda.Tests.Producing
         [Fact]
         public void Can_create_outgoing_message_with_expected_topic()
         {
-            var outgoingMessage = new OutgoingMessageBuilder()
+            var outgoingMessage = OutgoingMessage.Create()
                 .WithTopic(DummyTopic)
                 .Build();
 
@@ -23,7 +23,7 @@ namespace Dafda.Tests.Producing
         {
             const string dummyMessageId = "foo";
 
-            var outgoingMessage = new OutgoingMessageBuilder()
+            var outgoingMessage = OutgoingMessage.Create()
                 .WithMessageId(dummyMessageId)
                 .Build();
 
@@ -35,7 +35,7 @@ namespace Dafda.Tests.Producing
         {
             const string dummyAggregateId = "dummyId";
 
-            var outgoingMessage = new OutgoingMessageBuilder()
+            var outgoingMessage = OutgoingMessage.Create()
                 .WithKey(dummyAggregateId)
                 .Build();
 
@@ -45,7 +45,7 @@ namespace Dafda.Tests.Producing
         [Fact]
         public void Can_create_outgoing_message_with_expected_type()
         {
-            var outgoingMessage = new OutgoingMessageBuilder()
+            var outgoingMessage = OutgoingMessage.Create()
                 .WithType(DummyType)
                 .Build();
 
@@ -55,7 +55,7 @@ namespace Dafda.Tests.Producing
         [Fact]
         public void Can_create_outgoing_message_with_expected_raw_message()
         {
-            var outgoingMessage = new OutgoingMessageBuilder()
+            var outgoingMessage = OutgoingMessage.Create()
                 .WithValue("rawMessage")
                 .Build();
 

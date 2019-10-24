@@ -25,7 +25,7 @@ namespace Dafda.Producing
             var messageId = _messageIdGenerator.NextMessageId();
             var rawMessage = SerializeRawMessage(messageId, registration.Type, message);
 
-            return new OutgoingMessageBuilder()
+            return OutgoingMessage.Create()
                 .WithTopic(registration.Topic)
                 .WithMessageId(messageId)
                 .WithKey(registration.KeySelector(message))
