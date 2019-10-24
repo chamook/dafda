@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dafda.Messaging;
-using Dafda.Tests.Builders;
 using Dafda.Tests.TestDoubles;
 using Xunit;
 
@@ -27,7 +26,7 @@ namespace Dafda.Tests.Consuming
 
             var sut = A.Consumer
                 .WithConfiguration(configuration)
-                .WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(message)))
+                .WithTopicSubscriberScopeFactory(A.TopicSubscriberScopeFactory.WithMessageResult(message))
                 .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(type => new UnitOfWorkStub(spy)))
                 .WithMessageHandlerRegistry(messageHandlerRegistry)
                 .Build();
@@ -42,7 +41,7 @@ namespace Dafda.Tests.Consuming
         {
             var sut = A.Consumer
                 .WithConfiguration(A.ValidConsumerConfiguration.Build())
-                .WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(new MessageResultBuilder().Build())))
+                .WithTopicSubscriberScopeFactory(A.TopicSubscriberScopeFactory.WithMessageResult(A.MessageResult))
                 .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(type => new UnitOfWorkStub(new object())))
                 .Build();
 
@@ -53,8 +52,6 @@ namespace Dafda.Tests.Consuming
         public async Task expected_order_of_handler_invocation_in_unit_of_work()
         {
             var orderOfInvocation = new LinkedList<string>();
-
-            var dummyMessageResult = new MessageResultBuilder().Build();
 
             var messageHandlerRegistry = A.MessageHandlerRegistry
                 .Register<FooMessage, FooMessageHandler>("bar", "foo")
@@ -67,7 +64,7 @@ namespace Dafda.Tests.Consuming
                     pre: () => orderOfInvocation.AddLast("before"),
                     post: () => orderOfInvocation.AddLast("after")
                 )))
-                .WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(dummyMessageResult)))
+                .WithTopicSubscriberScopeFactory(A.TopicSubscriberScopeFactory.WithMessageResult(A.MessageResult))
                 .WithMessageHandlerRegistry(messageHandlerRegistry)
                 .Build();
 
@@ -83,7 +80,7 @@ namespace Dafda.Tests.Consuming
 
             var wasCalled = false;
 
-            var resultSpy = new MessageResultBuilder()
+            var resultSpy = A.MessageResult
                 .WithOnCommit(() =>
                 {
                     wasCalled = true;
@@ -101,7 +98,7 @@ namespace Dafda.Tests.Consuming
 
             var sut = A.Consumer
                 .WithConfiguration(configuration)
-                .WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(resultSpy)))
+                .WithTopicSubscriberScopeFactory(A.TopicSubscriberScopeFactory.WithMessageResult(resultSpy))
                 .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(x => new UnitOfWorkStub(handlerStub)))
                 .WithMessageHandlerRegistry(messageHandlerRegistry)
                 .Build();
@@ -118,15 +115,13 @@ namespace Dafda.Tests.Consuming
 
             var wasCalled = false;
 
-            var resultSpy = new MessageResultBuilder()
+            var resultSpy = A.MessageResult
                 .WithOnCommit(() =>
                 {
                     wasCalled = true;
                     return Task.CompletedTask;
                 })
                 .Build();
-
-            var topicSubscriberScopeFactoryStub = new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(resultSpy));
 
             var messageHandlerRegistry = A.MessageHandlerRegistry
                 .Register<FooMessage, FooMessageHandler>("bar", "foo")
@@ -138,7 +133,7 @@ namespace Dafda.Tests.Consuming
 
             var sut = A.Consumer
                 .WithConfiguration(configuration)
-                .WithTopicSubscriberScopeFactory(topicSubscriberScopeFactoryStub)
+                .WithTopicSubscriberScopeFactory(A.TopicSubscriberScopeFactory.WithMessageResult(resultSpy))
                 .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(x => new UnitOfWorkStub(handlerStub)))
                 .WithMessageHandlerRegistry(messageHandlerRegistry)
                 .Build();

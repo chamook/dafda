@@ -39,7 +39,9 @@ namespace Dafda.Tests.Configuration
                 options.WithGroupId("dummyGroupId");
                 options.RegisterMessageHandler<DummyMessage, DummyMessageHandler>("dummyTopic", nameof(DummyMessage));
 
-                options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(messageResult)));
+                options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryBuilder()
+                    .WithMessageResult(messageResult)
+                    .Build());
             });
             var serviceProvider = services.BuildServiceProvider();
 
@@ -74,7 +76,9 @@ namespace Dafda.Tests.Configuration
 
                 options.WithUnitOfWorkFactory<ScopedUnitOfWorkFactory>();
 
-                options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(messageResult)));
+                options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryBuilder()
+                    .WithMessageResult(messageResult)
+                    .Build());
             });
             var serviceProvider = services.BuildServiceProvider();
 

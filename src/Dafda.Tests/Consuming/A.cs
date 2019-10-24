@@ -13,5 +13,11 @@ namespace Dafda.Tests.Consuming
         public static MessageResultBuilder MessageResult => new MessageResultBuilder();
         public static MessageHandlerRegistryBuilder MessageHandlerRegistry => new MessageHandlerRegistryBuilder();
         public static ConsumerBuilder Consumer => new ConsumerBuilder();
+        public static TopicSubscriberScopeFactoryBuilder TopicSubscriberScopeFactory => new TopicSubscriberScopeFactoryBuilder();
+
+        public static ConsumerBuilder WithTopicSubscriberScopeFactory(this ConsumerBuilder consumerBuilder, TopicSubscriberScopeFactoryBuilder builder)
+        {
+            return consumerBuilder.WithTopicSubscriberScopeFactory(builder.Build());
+        }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dafda.Configuration;
+using Dafda.Consuming;
 using Dafda.Messaging;
 using Dafda.Tests.Builders;
 using Dafda.Tests.TestDoubles;
@@ -36,7 +37,9 @@ namespace Dafda.Tests.Configuration
                 options.WithGroupId("dummyGroupId");
                 options.RegisterMessageHandler<DummyMessage, DummyMessageHandler>("dummyTopic", nameof(DummyMessage));
 
-                options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(messageResult)));
+                options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryBuilder()
+                    .WithMessageResult(messageResult)
+                    .Build());
             });
 
             services.AddTransient<ScopeSpy>();
@@ -76,7 +79,9 @@ namespace Dafda.Tests.Configuration
                 options.WithGroupId("dummyGroupId");
                 options.RegisterMessageHandler<DummyMessage, DummyMessageHandler>("dummyTopic", nameof(DummyMessage));
 
-                options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(messageResult)));
+                options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryBuilder()
+                    .WithMessageResult(messageResult)
+                    .Build());
             });
 
             services.AddSingleton<ScopeSpy>();
@@ -116,7 +121,9 @@ namespace Dafda.Tests.Configuration
                 options.WithGroupId("dummyGroupId");
                 options.RegisterMessageHandler<DummyMessage, DummyMessageHandler>("dummyTopic", nameof(DummyMessage));
 
-                options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(messageResult)));
+                options.WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryBuilder()
+                    .WithMessageResult(messageResult)
+                    .Build());
             });
 
             services.AddScoped<ScopeSpy>();
