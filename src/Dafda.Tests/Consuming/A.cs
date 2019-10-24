@@ -1,4 +1,5 @@
 using Dafda.Configuration;
+using Dafda.Consuming;
 using Dafda.Messaging;
 using Dafda.Tests.Builders;
 

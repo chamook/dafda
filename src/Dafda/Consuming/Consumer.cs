@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dafda.Configuration;
-using Dafda.Consuming;
+using Dafda.Messaging;
 
-namespace Dafda.Messaging
+namespace Dafda.Consuming
 {
     public class Consumer
     {
