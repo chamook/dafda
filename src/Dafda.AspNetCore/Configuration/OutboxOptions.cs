@@ -8,7 +8,7 @@ namespace Dafda.Configuration
     public interface IOutboxOptions
     {
         void WithOutboxMessageRepository<T>() where T : class, IOutboxMessageRepository;
-        void WithOutboxMessageRepository(Func<IServiceProvider,IOutboxMessageRepository> implementationFactory);
+        void WithOutboxMessageRepository(Func<IServiceProvider, IOutboxMessageRepository> implementationFactory);
         void WithOutboxPublisher(Action<IOutboxPublisherOptions> config);
     }
 
@@ -39,10 +39,9 @@ namespace Dafda.Configuration
             // TODO -- outbox producer
             _services.AddHostedService<PollingPublisher>();
         }
-
     }
 
-    public interface IOutboxPublisherOptions 
+    public interface IOutboxPublisherOptions
     {
         void WithUnitOfWorkFactory<T>() where T : class, IOutboxUnitOfWorkFactory;
         void WithUnitOfWorkFactory(Func<IServiceProvider, IOutboxUnitOfWorkFactory> implementationFactory);

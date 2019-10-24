@@ -7,7 +7,7 @@ namespace Dafda.Configuration
 {
     public static class ConsumerServiceCollectionExtensions
     {
-        public static void AddConsumer(this IServiceCollection services, Action<IConsumerOptions> options = null)
+        public static void AddConsumer(this IServiceCollection services, Action<IConsumerOptions> options)
         {
             var consumerOptions = new ConsumerOptions(services);
             consumerOptions.WithUnitOfWorkFactory<ServiceProviderUnitOfWorkFactory>();
