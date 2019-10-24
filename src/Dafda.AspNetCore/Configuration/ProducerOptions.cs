@@ -21,50 +21,50 @@ namespace Dafda.Configuration
 
     internal class ProducerOptions : IProducerOptions
     {
-        private readonly ProducerBuilder _builder;
-        private readonly IServiceCollection _services;
-        private readonly IOutgoingMessageRegistry _outgoingMessageRegistry;
+        private readonly ProducerConfigurationBuilder _configurationBuilder = new ProducerConfigurationBuilder();
+        private readonly ProducerBuilder _builder = new ProducerBuilder();
+        private readonly IOutgoingMessageRegistry _outgoingMessageRegistry = new OutgoingMessageRegistry();
 
-        public ProducerOptions(ProducerBuilder builder, IServiceCollection services, IOutgoingMessageRegistry outgoingMessageRegistry)
+        private readonly IServiceCollection _services;
+
+        public ProducerOptions(IServiceCollection services)
         {
-            _builder = builder;
             _services = services;
-            _outgoingMessageRegistry = outgoingMessageRegistry;
         }
 
         public void WithConfigurationSource(ConfigurationSource configurationSource)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithConfigurationSource(configurationSource));
+            _configurationBuilder.WithConfigurationSource(configurationSource);
         }
 
         public void WithConfigurationSource(Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithConfigurationSource(new DefaultConfigurationSource(configuration)));
+            _configurationBuilder.WithConfigurationSource(new DefaultConfigurationSource(configuration));
         }
 
         public void WithNamingConvention(NamingConvention namingConvention)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithNamingConvention(namingConvention));
+            _configurationBuilder.WithNamingConvention(namingConvention);
         }
 
         public void WithEnvironmentStyle(string prefix = null, params string[] additionalPrefixes)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithEnvironmentStyle(prefix, additionalPrefixes));
+            _configurationBuilder.WithEnvironmentStyle(prefix, additionalPrefixes);
         }
 
         public void WithConfiguration(string key, string value)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithConfiguration(key, value));
+            _configurationBuilder.WithConfiguration(key, value);
         }
 
         public void WithBootstrapServers(string bootstrapServers)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithBootstrapServers(bootstrapServers));
+            _configurationBuilder.WithBootstrapServers(bootstrapServers);
         }
 
         public void WithKafkaProducerFactory(IKafkaProducerFactory kafkaProducerFactory)
         {
-            _builder.WithConfiguration(_configurationBuilder => _builder.WithKafkaProducerFactory(kafkaProducerFactory));
+            _builder.WithKafkaProducerFactory(kafkaProducerFactory);
         }
 
         public void WithMessageIdGenerator(MessageIdGenerator messageIdGenerator)
@@ -88,6 +88,16 @@ namespace Dafda.Configuration
                 var repository = provider.GetRequiredService<IOutboxMessageRepository>();
                 return new OutboxMessageCollector(producerConfiguration.MessageIdGenerator, producerConfiguration.OutgoingMessageRegistry, repository);
             });
+        }
+
+        public IProducer Build()
+        {
+            var configuration = _configurationBuilder.Build();
+
+            _builder.WithConfiguration(configuration);
+            _builder.WithOutgoingMessageRegistry(_outgoingMessageRegistry);
+
+            return _builder.Build();
         }
 
         private class DefaultConfigurationSource : ConfigurationSource

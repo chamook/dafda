@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Dafda.Configuration;
 using Dafda.Tests.TestDoubles;
 using Xunit;
 
@@ -16,13 +17,13 @@ namespace Dafda.Tests.Producing
             const string dummyAggregateId = "dummyId";
 
             var spy = new KafkaProducerSpy();
-            var sut = A.Producer
-                .With(spy)
-                .With(A.OutgoingMessageRegistry
+            var sut = new ProducerBuilder()
+                .WithKafkaProducerFactory(new KafkaProducerFactoryStub(spy))
+                .WithOutgoingMessageRegistry(A.OutgoingMessageRegistry
                     .Register<DummyMessage>(DummyTopic, DummyType, x => x.AggregateId)
                     .Build()
                 )
-                .With(new MessageIdGeneratorStub(() => dummyMessageId))
+                .WithMessageIdGenerator(new MessageIdGeneratorStub(() => dummyMessageId))
                 .Build();
 
             await sut.Produce(new DummyMessage(dummyAggregateId));

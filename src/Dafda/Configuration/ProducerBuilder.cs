@@ -1,4 +1,3 @@
-using System;
 using Dafda.Producing;
 using Dafda.Producing.Kafka;
 
@@ -6,58 +5,40 @@ namespace Dafda.Configuration
 {
     public class ProducerBuilder
     {
-        private readonly ProducerConfigurationBuilder _configuration = new ProducerConfigurationBuilder();
-
+        private IConfiguration _configuration = new Configuration();
         private MessageIdGenerator _messageIdGenerator = MessageIdGenerator.Default;
         private IOutgoingMessageRegistry _outgoingMessageRegistry = new OutgoingMessageRegistry();
         private IKafkaProducerFactory _kafkaProducerFactory = new KafkaProducerFactory();
 
-        public void WithConfiguration(Action<ProducerConfigurationBuilder> configuration)
+        public ProducerBuilder WithConfiguration(IConfiguration configuration)
         {
-            configuration(_configuration);
+            _configuration = configuration;
+            return this;
         }
 
-        public void WithMessageIdGenerator(MessageIdGenerator messageIdGenerator)
+        public ProducerBuilder WithMessageIdGenerator(MessageIdGenerator messageIdGenerator)
         {
             _messageIdGenerator = messageIdGenerator;
+            return this;
         }
 
-        public void WithOutgoingMessageRegistry(IOutgoingMessageRegistry outgoingMessageRegistry)
+        public ProducerBuilder WithOutgoingMessageRegistry(IOutgoingMessageRegistry outgoingMessageRegistry)
         {
             _outgoingMessageRegistry = outgoingMessageRegistry;
+            return this;
         }
 
-        public void WithKafkaProducerFactory(IKafkaProducerFactory kafkaProducerFactory)
+        public ProducerBuilder WithKafkaProducerFactory(IKafkaProducerFactory kafkaProducerFactory)
         {
             _kafkaProducerFactory = kafkaProducerFactory;
+            return this;
         }
 
-        public IProducerConfiguration Build()
+        public IProducer Build()
         {
-            var configuration = _configuration.Build();
+            var kafkaProducer = _kafkaProducerFactory.CreateProducer(_configuration);
 
-            return new ProducerConfiguration(
-                configuration,
-                _messageIdGenerator,
-                _outgoingMessageRegistry,
-                _kafkaProducerFactory
-            );
-        }
-
-        private class ProducerConfiguration : IProducerConfiguration
-        {
-            public ProducerConfiguration(IConfiguration configuration, MessageIdGenerator messageIdGenerator, IOutgoingMessageRegistry outgoingMessageRegistry, IKafkaProducerFactory kafkaProducerFactory)
-            {
-                Configuration = configuration;
-                MessageIdGenerator = messageIdGenerator;
-                OutgoingMessageRegistry = outgoingMessageRegistry;
-                KafkaProducerFactory = kafkaProducerFactory;
-            }
-
-            public IConfiguration Configuration { get; }
-            public MessageIdGenerator MessageIdGenerator { get; }
-            public IOutgoingMessageRegistry OutgoingMessageRegistry { get; }
-            public IKafkaProducerFactory KafkaProducerFactory { get; }
+            return new Producer(kafkaProducer, _outgoingMessageRegistry, _messageIdGenerator);
         }
     }
 }

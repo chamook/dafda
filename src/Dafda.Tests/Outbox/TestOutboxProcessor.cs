@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dafda.Configuration;
 using Dafda.Tests.Configuration;
 using Dafda.Tests.TestDoubles;
 using Xunit;
@@ -23,8 +24,8 @@ namespace Dafda.Tests.Outbox
                     .WithValue("qux")
                     .OccurredOnUtc(DateTime.UtcNow)
                 ))
-                .With(A.Producer
-                    .With(spy)
+                .With(new ProducerBuilder()
+                    .WithKafkaProducerFactory(new KafkaProducerFactoryStub(spy))
                     .Build()
                 )
                 .Build();
