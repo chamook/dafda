@@ -13,6 +13,10 @@ namespace Dafda.Configuration
 
         private ConfigurationSource _configurationSource = ConfigurationSource.Null;
 
+        protected internal ConfigurationBuilderBase()
+        {
+        }
+
         public T WithConfiguration(string key, string value)
         {
             _configuration[key] = value;

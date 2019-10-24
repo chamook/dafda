@@ -11,8 +11,6 @@ using Dafda.Tests.Builders;
 using Dafda.Tests.TestDoubles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Dafda.Tests.Configuration
@@ -20,30 +18,10 @@ namespace Dafda.Tests.Configuration
     public class TestServiceCollectionExtensions
     {
         [Fact]
-        public void Can_get_configuration()
-        {
-            var services = new ServiceCollection();
-            services.AddConsumer(options =>
-            {
-                options.WithConfigurationSource(new ConfigurationStub(
-                    ("SERVICE_GROUP_ID", "foo"),
-                    ("DEFAULT_KAFKA_BOOTSTRAP_SERVERS", "bar"))
-                );
-                options.WithEnvironmentStyle("SERVICE", "DEFAULT_KAFKA");
-            });
-
-            var serviceProvider = services.BuildServiceProvider();
-            var configuration = serviceProvider.GetRequiredService<IConsumerConfiguration>();
-
-            Assert.Equal("foo", configuration.Configuration.FirstOrDefault(x => x.Key == "group.id").Value);
-            Assert.Equal("bar", configuration.Configuration.FirstOrDefault(x => x.Key == "bootstrap.servers").Value);
-        }
-
-        [Fact]
         public async Task Can_consume_message()
         {
             Scoped.Reset();
-            
+
             var dummyMessage = new DummyMessage();
             var messageStub = new TransportLevelMessageBuilder()
                 .WithType(nameof(DummyMessage))
@@ -54,7 +32,7 @@ namespace Dafda.Tests.Configuration
                 .Build();
 
             var services = new ServiceCollection();
-            services.AddScoped<Scoped>();
+            services.AddTransient<Scoped>();
             services.AddConsumer(options =>
             {
                 options.WithBootstrapServers("dummyBootstrapServer");
@@ -238,7 +216,7 @@ namespace Dafda.Tests.Configuration
             var scoped = scope.ServiceProvider.GetRequiredService<Scoped>();
 
             return execute();
-            
+
 //
 // return base.ExecuteInScope(scope, execute);
         }

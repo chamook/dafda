@@ -25,48 +25,50 @@ namespace Dafda.Configuration
 
     internal class ConsumerOptions : IConsumerOptions
     {
-        private readonly ConsumerBuilder _builder;
+        private readonly ConsumerConfigurationBuilder _configurationBuilder = new ConsumerConfigurationBuilder();
+        private readonly ConsumerBuilder _consumerBuilder = new ConsumerBuilder();
+        private readonly IMessageHandlerRegistry _messageHandlerRegistry = new MessageHandlerRegistry();
+
         private readonly IServiceCollection _services;
 
-        public ConsumerOptions(ConsumerBuilder builder, IServiceCollection services)
+        public ConsumerOptions(IServiceCollection services)
         {
             _services = services;
-            _builder = builder;
         }
 
         public void WithConfigurationSource(ConfigurationSource configurationSource)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithConfigurationSource(configurationSource));
+            _configurationBuilder.WithConfigurationSource(configurationSource);
         }
 
         public void WithConfigurationSource(Microsoft.Extensions.Configuration.IConfiguration configuration)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithConfigurationSource(new DefaultConfigurationSource(configuration)));
+            _configurationBuilder.WithConfigurationSource(new DefaultConfigurationSource(configuration));
         }
 
         public void WithNamingConvention(NamingConvention namingConvention)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithNamingConvention(namingConvention));
+            _configurationBuilder.WithNamingConvention(namingConvention);
         }
 
         public void WithEnvironmentStyle(string prefix = null, params string[] additionalPrefixes)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithEnvironmentStyle(prefix, additionalPrefixes));
+            _configurationBuilder.WithEnvironmentStyle(prefix, additionalPrefixes);
         }
 
         public void WithConfiguration(string key, string value)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithConfiguration(key, value));
+            _configurationBuilder.WithConfiguration(key, value);
         }
 
         public void WithGroupId(string groupId)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithGroupId(groupId));
+            _configurationBuilder.WithGroupId(groupId);
         }
 
         public void WithBootstrapServers(string bootstrapServers)
         {
-            _builder.WithConfiguration(_configurationBuilder => _configurationBuilder.WithBootstrapServers(bootstrapServers));
+            _configurationBuilder.WithBootstrapServers(bootstrapServers);
         }
 
         public void WithUnitOfWorkFactory<T>() where T : class, IHandlerUnitOfWorkFactory
@@ -81,15 +83,26 @@ namespace Dafda.Configuration
 
         public void WithTopicSubscriberScopeFactory(ITopicSubscriberScopeFactory topicSubscriberScopeFactory)
         {
-            _builder.WithTopicSubscriberScopeFactory(topicSubscriberScopeFactory);
+            _consumerBuilder.WithTopicSubscriberScopeFactory(topicSubscriberScopeFactory);
         }
 
         public void RegisterMessageHandler<TMessage, TMessageHandler>(string topic, string messageType)
             where TMessage : class, new()
             where TMessageHandler : class, IMessageHandler<TMessage>
         {
-            _builder.RegisterMessageHandler<TMessage, TMessageHandler>(topic, messageType);
+            _messageHandlerRegistry.Register<TMessage, TMessageHandler>(topic, messageType);
             _services.AddTransient<TMessageHandler>();
+        }
+
+        public Consumer Build(IServiceProvider provider)
+        {
+            var configuration = _configurationBuilder.Build();
+
+            return _consumerBuilder
+                .WithConfiguration(configuration)
+                .WithMessageHandlerRegistry(_messageHandlerRegistry)
+                .WithUnitOfWorkFactory(provider.GetRequiredService<IHandlerUnitOfWorkFactory>())
+                .Build();
         }
 
         private class DefaultConfigurationSource : ConfigurationSource

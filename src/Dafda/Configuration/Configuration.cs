@@ -7,6 +7,10 @@ namespace Dafda.Configuration
     {
         private readonly IDictionary<string, string> _configuration;
 
+        public Configuration() : this(new Dictionary<string, string>())
+        {
+        }
+
         public Configuration(IDictionary<string, string> configuration)
         {
             _configuration = configuration;

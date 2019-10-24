@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Dafda.Messaging;
 using Dafda.Tests.Builders;
 using Dafda.Tests.TestDoubles;
-using Moq;
 using Xunit;
 
 namespace Dafda.Tests.Consuming
@@ -14,29 +13,38 @@ namespace Dafda.Tests.Consuming
         [Fact]
         public async Task invokes_expected_handler_when_consuming()
         {
-            var handlerMock = new Mock<IMessageHandler<FooMessage>>();
-            var handlerStub = handlerMock.Object;
-
-            var messageRegistrationStub = new MessageRegistrationBuilder()
-                .WithHandlerInstanceType(handlerStub.GetType())
-                .WithMessageInstanceType(typeof(FooMessage))
-                .WithMessageType("foo")
+            var message = A.MessageResult
+                .WithTransportLevelMessage(new TransportLevelMessageStub(new FooMessage(), "bar"))
                 .Build();
 
-            var sut = new ConsumerBuilder()
-                .WithUnitOfWorkFactory(type => new UnitOfWorkStub(handlerStub))
-                .WithMessageRegistrations(messageRegistrationStub)
+            var spy = new FooMessageHandler();
+
+            var configuration = A.ValidConsumerConfiguration.Build();
+
+            var messageHandlerRegistry = A.MessageHandlerRegistry
+                .Register<FooMessage, FooMessageHandler>("foo", "bar")
+                .Build();
+
+            var sut = A.Consumer
+                .WithConfiguration(configuration)
+                .WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(message)))
+                .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(type => new UnitOfWorkStub(spy)))
+                .WithMessageHandlerRegistry(messageHandlerRegistry)
                 .Build();
 
             await sut.ConsumeSingle(CancellationToken.None);
 
-            handlerMock.Verify(x => x.Handle(It.IsAny<FooMessage>()), Times.Once);
+            Assert.True(spy.WasCalled);
         }
 
         [Fact]
         public async Task throws_expected_exception_when_consuming_a_message_without_a_handler_as_been_registered_for_it()
         {
-            var sut = new ConsumerBuilder().Build();
+            var sut = A.Consumer
+                .WithConfiguration(A.ValidConsumerConfiguration.Build())
+                .WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(new MessageResultBuilder().Build())))
+                .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(type => new UnitOfWorkStub(new object())))
+                .Build();
 
             await Assert.ThrowsAsync<MissingMessageHandlerRegistrationException>(() => sut.ConsumeSingle(CancellationToken.None));
         }
@@ -47,16 +55,20 @@ namespace Dafda.Tests.Consuming
             var orderOfInvocation = new LinkedList<string>();
 
             var dummyMessageResult = new MessageResultBuilder().Build();
-            var dummyMessageRegistration = new MessageRegistrationBuilder().Build();
 
-            var sut = new ConsumerBuilder()
-                .WithUnitOfWorkFactory(type => new UnitOfWorkSpy(
+            var messageHandlerRegistry = A.MessageHandlerRegistry
+                .Register<FooMessage, FooMessageHandler>("bar", "foo")
+                .Build();
+
+            var sut = A.Consumer
+                .WithConfiguration(A.ValidConsumerConfiguration.Build())
+                .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(type => new UnitOfWorkSpy(
                     handlerInstance: new MessageHandlerSpy<FooMessage>(() => orderOfInvocation.AddLast("during")),
                     pre: () => orderOfInvocation.AddLast("before"),
                     post: () => orderOfInvocation.AddLast("after")
-                ))
+                )))
                 .WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(dummyMessageResult)))
-                .WithMessageRegistrations(dummyMessageRegistration)
+                .WithMessageHandlerRegistry(messageHandlerRegistry)
                 .Build();
 
             await sut.ConsumeSingle(CancellationToken.None);
@@ -69,12 +81,6 @@ namespace Dafda.Tests.Consuming
         {
             var handlerStub = Dummy.Of<IMessageHandler<FooMessage>>();
 
-            var messageRegistrationStub = new MessageRegistrationBuilder()
-                .WithHandlerInstanceType(handlerStub.GetType())
-                .WithMessageInstanceType(typeof(FooMessage))
-                .WithMessageType("foo")
-                .Build();
-
             var wasCalled = false;
 
             var resultSpy = new MessageResultBuilder()
@@ -85,15 +91,22 @@ namespace Dafda.Tests.Consuming
                 })
                 .Build();
 
-            var topicSubscriberScopeFactoryStub = new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(resultSpy));
-            var consumer = new ConsumerBuilder()
-                .WithTopicSubscriberScopeFactory(topicSubscriberScopeFactoryStub)
-                .WithUnitOfWorkFactory(x => new UnitOfWorkStub(handlerStub))
-                .WithMessageRegistrations(messageRegistrationStub)
+            var configuration = A.ValidConsumerConfiguration
                 .WithEnableAutoCommit(true)
                 .Build();
 
-            await consumer.ConsumeSingle(CancellationToken.None);
+            var messageHandlerRegistry = A.MessageHandlerRegistry
+                .Register<FooMessage, FooMessageHandler>("bar", "foo")
+                .Build();
+
+            var sut = A.Consumer
+                .WithConfiguration(configuration)
+                .WithTopicSubscriberScopeFactory(new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(resultSpy)))
+                .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(x => new UnitOfWorkStub(handlerStub)))
+                .WithMessageHandlerRegistry(messageHandlerRegistry)
+                .Build();
+
+            await sut.ConsumeSingle(CancellationToken.None);
 
             Assert.False(wasCalled);
         }
@@ -103,12 +116,6 @@ namespace Dafda.Tests.Consuming
         {
             var handlerStub = Dummy.Of<IMessageHandler<FooMessage>>();
 
-            var messageRegistrationStub = new MessageRegistrationBuilder()
-                .WithHandlerInstanceType(handlerStub.GetType())
-                .WithMessageInstanceType(typeof(FooMessage))
-                .WithMessageType("foo")
-                .Build();
-
             var wasCalled = false;
 
             var resultSpy = new MessageResultBuilder()
@@ -120,14 +127,23 @@ namespace Dafda.Tests.Consuming
                 .Build();
 
             var topicSubscriberScopeFactoryStub = new TopicSubscriberScopeFactoryStub(new TopicSubscriberScopeStub(resultSpy));
-            var consumer = new ConsumerBuilder()
-                .WithTopicSubscriberScopeFactory(topicSubscriberScopeFactoryStub)
-                .WithUnitOfWorkFactory(x => new UnitOfWorkStub(handlerStub))
-                .WithMessageRegistrations(messageRegistrationStub)
+
+            var messageHandlerRegistry = A.MessageHandlerRegistry
+                .Register<FooMessage, FooMessageHandler>("bar", "foo")
+                .Build();
+
+            var configuration = A.ValidConsumerConfiguration
                 .WithEnableAutoCommit(false)
                 .Build();
 
-            await consumer.ConsumeSingle(CancellationToken.None);
+            var sut = A.Consumer
+                .WithConfiguration(configuration)
+                .WithTopicSubscriberScopeFactory(topicSubscriberScopeFactoryStub)
+                .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(x => new UnitOfWorkStub(handlerStub)))
+                .WithMessageHandlerRegistry(messageHandlerRegistry)
+                .Build();
+
+            await sut.ConsumeSingle(CancellationToken.None);
 
             Assert.True(wasCalled);
         }
@@ -137,6 +153,17 @@ namespace Dafda.Tests.Consuming
         public class FooMessage
         {
             public string Value { get; set; }
+        }
+
+        public class FooMessageHandler : IMessageHandler<FooMessage>
+        {
+            public Task Handle(FooMessage message)
+            {
+                WasCalled = true;
+                return Task.CompletedTask;
+            }
+
+            public bool WasCalled { get; private set; }
         }
 
         #endregion

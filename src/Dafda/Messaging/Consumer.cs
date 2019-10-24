@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dafda.Configuration;
@@ -7,20 +9,22 @@ namespace Dafda.Messaging
 {
     public class Consumer
     {
-        private readonly IConsumerConfiguration _configuration;
+        private readonly IConfiguration _configuration;
         private readonly ITopicSubscriberScopeFactory _topicSubscriberScopeFactory;
         private readonly LocalMessageDispatcher _localMessageDispatcher;
+        private readonly IList<string> _subscribedTopics;
 
-        public Consumer(IConsumerConfiguration configuration)
+        public Consumer(IConfiguration configuration, ITopicSubscriberScopeFactory subscriberScopeFactory, IMessageHandlerRegistry messageHandlerRegistry, IHandlerUnitOfWorkFactory unitOfWorkFactory, IEnumerable<string> subscribedTopics)
         {
+            _localMessageDispatcher = new LocalMessageDispatcher(messageHandlerRegistry, unitOfWorkFactory);
+            _topicSubscriberScopeFactory = subscriberScopeFactory;
             _configuration = configuration;
-            _localMessageDispatcher = new LocalMessageDispatcher(configuration.MessageHandlerRegistry, configuration.UnitOfWorkFactory);
-            _topicSubscriberScopeFactory = _configuration.TopicSubscriberScopeFactory;
+            _subscribedTopics = subscribedTopics.ToList();
         }
 
         public async Task ConsumeAll(CancellationToken cancellationToken)
         {
-            using (var subscriberScope = _topicSubscriberScopeFactory.CreateTopicSubscriberScope(_configuration))
+            using (var subscriberScope = _topicSubscriberScopeFactory.CreateTopicSubscriberScope(_configuration, _subscribedTopics))
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
@@ -31,7 +35,7 @@ namespace Dafda.Messaging
 
         public async Task ConsumeSingle(CancellationToken cancellationToken)
         {
-            using (var subscriberScope = _topicSubscriberScopeFactory.CreateTopicSubscriberScope(_configuration))
+            using (var subscriberScope = _topicSubscriberScopeFactory.CreateTopicSubscriberScope(_configuration, _subscribedTopics))
             {
                 await ProcessNextMessage(subscriberScope, cancellationToken);
             }
@@ -42,7 +46,7 @@ namespace Dafda.Messaging
             var messageResult = await topicSubscriberScope.GetNext(cancellationToken);
             await _localMessageDispatcher.Dispatch(messageResult.Message);
 
-            if (_configuration.Configuration.EnableAutoCommit == false)
+            if (_configuration.EnableAutoCommit == false)
             {
                 await messageResult.Commit();
             }

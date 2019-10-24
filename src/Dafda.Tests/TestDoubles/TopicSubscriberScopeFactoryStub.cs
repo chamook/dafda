@@ -13,7 +13,7 @@ namespace Dafda.Tests.TestDoubles
             _result = result;
         }
 
-        public TopicSubscriberScope CreateTopicSubscriberScope(IConsumerConfiguration configuration)
+        public TopicSubscriberScope CreateTopicSubscriberScope(IConfiguration configuration, IEnumerable<string> subscribedTopics)
         {
             return _result;
         }
