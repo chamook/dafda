@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using Dafda.Outbox;
 using Dafda.Tests.TestDoubles;
 using Xunit;
+using static Dafda.Tests.TestDoubles.MockHelper;
 
 namespace Dafda.Tests.Outbox
 {
@@ -10,7 +12,10 @@ namespace Dafda.Tests.Outbox
         [Fact]
         public async Task Fails_for_unregistered_outgoing_messages()
         {
-            var sut = A.OutboxMessageCollector.Build();
+            var sut = OutboxMessageCollector.Create()
+                .WithOutboxMessageRepository(Dummy<IOutboxMessageRepository>())
+                .WithOutboxMessageRegistry(A.OutgoingMessageRegistry.Build())
+                .Build();
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => sut.Enqueue(new[] {new Message()}));
         }
@@ -20,13 +25,13 @@ namespace Dafda.Tests.Outbox
         {
             var spy = new OutboxMessageRepositorySpy();
 
-            var sut = A.OutboxMessageCollector
-                .With(
+            var sut = OutboxMessageCollector.Create()
+                .WithOutboxMessageRegistry(
                     A.OutgoingMessageRegistry
                         .Register<Message>("foo", "bar", @event => "baz")
                         .Build()
                 )
-                .With(spy)
+                .WithOutboxMessageRepository(spy)
                 .Build();
 
             await sut.Enqueue(new[] {new Message()});

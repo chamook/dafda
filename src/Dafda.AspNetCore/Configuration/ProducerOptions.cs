@@ -24,6 +24,7 @@ namespace Dafda.Configuration
         private readonly ProducerConfigurationBuilder _configurationBuilder = new ProducerConfigurationBuilder();
         private readonly ProducerBuilder _builder = new ProducerBuilder();
         private readonly IOutgoingMessageRegistry _outgoingMessageRegistry = new OutgoingMessageRegistry();
+        private readonly OutboxMessageCollector.Builder _outboxBuilder = OutboxMessageCollector.Create();
 
         private readonly IServiceCollection _services;
 
@@ -70,6 +71,7 @@ namespace Dafda.Configuration
         public void WithMessageIdGenerator(MessageIdGenerator messageIdGenerator)
         {
             _builder.WithMessageIdGenerator(messageIdGenerator);
+            _outboxBuilder.WithMessageIdGenerator(messageIdGenerator);
         }
 
         public void Register<T>(string topic, string type, Func<T, string> keySelector) where T : class
@@ -84,9 +86,12 @@ namespace Dafda.Configuration
 
             _services.AddTransient<IOutbox>(provider =>
             {
-                var producerConfiguration = provider.GetRequiredService<IProducerConfiguration>();
                 var repository = provider.GetRequiredService<IOutboxMessageRepository>();
-                return new OutboxMessageCollector(producerConfiguration.MessageIdGenerator, producerConfiguration.OutgoingMessageRegistry, repository);
+
+                return _outboxBuilder
+                    .WithOutboxMessageRegistry(_outgoingMessageRegistry)
+                    .WithOutboxMessageRepository(repository)
+                    .Build();
             });
         }
 
