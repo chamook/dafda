@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dafda.Configuration;
+using Dafda.Consuming;
 using Dafda.Messaging;
 using Dafda.Tests.TestDoubles;
 using Xunit;
@@ -18,14 +20,15 @@ namespace Dafda.Tests.Consuming
 
             var spy = new FooMessageHandler();
 
-            var configuration = A.ValidConsumerConfiguration.Build();
-
             var messageHandlerRegistry = A.MessageHandlerRegistry
                 .Register<FooMessage, FooMessageHandler>("foo", "bar")
                 .Build();
 
-            var sut = A.Consumer
-                .WithConfiguration(configuration)
+            var sut = new ConsumerBuilder()
+                .WithConfiguration(new ConsumerConfigurationBuilder()
+                    .WithGroupId("foo.group.id")
+                    .WithBootstrapServers("foo.bootstrap.servers")
+                )
                 .WithTopicSubscriberScopeFactory(A.TopicSubscriberScopeFactory.WithMessageResult(message))
                 .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(type => new UnitOfWorkStub(spy)))
                 .WithMessageHandlerRegistry(messageHandlerRegistry)
@@ -39,8 +42,11 @@ namespace Dafda.Tests.Consuming
         [Fact]
         public async Task throws_expected_exception_when_consuming_a_message_without_a_handler_as_been_registered_for_it()
         {
-            var sut = A.Consumer
-                .WithConfiguration(A.ValidConsumerConfiguration.Build())
+            var sut = new ConsumerBuilder()
+                .WithConfiguration(new ConsumerConfigurationBuilder()
+                    .WithGroupId("foo.group.id")
+                    .WithBootstrapServers("foo.bootstrap.servers")
+                )
                 .WithTopicSubscriberScopeFactory(A.TopicSubscriberScopeFactory.WithMessageResult(A.MessageResult))
                 .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(type => new UnitOfWorkStub(new object())))
                 .Build();
@@ -57,8 +63,11 @@ namespace Dafda.Tests.Consuming
                 .Register<FooMessage, FooMessageHandler>("bar", "foo")
                 .Build();
 
-            var sut = A.Consumer
-                .WithConfiguration(A.ValidConsumerConfiguration.Build())
+            var sut = new ConsumerBuilder()
+                .WithConfiguration(new ConsumerConfigurationBuilder()
+                    .WithGroupId("foo.group.id")
+                    .WithBootstrapServers("foo.bootstrap.servers")
+                )
                 .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(type => new UnitOfWorkSpy(
                     handlerInstance: new MessageHandlerSpy<FooMessage>(() => orderOfInvocation.AddLast("during")),
                     pre: () => orderOfInvocation.AddLast("before"),
@@ -88,16 +97,16 @@ namespace Dafda.Tests.Consuming
                 })
                 .Build();
 
-            var configuration = A.ValidConsumerConfiguration
-                .WithEnableAutoCommit(true)
-                .Build();
-
             var messageHandlerRegistry = A.MessageHandlerRegistry
                 .Register<FooMessage, FooMessageHandler>("bar", "foo")
                 .Build();
 
-            var sut = A.Consumer
-                .WithConfiguration(configuration)
+            var sut = new ConsumerBuilder()
+                .WithConfiguration(new ConsumerConfigurationBuilder()
+                    .WithGroupId("foo.group.id")
+                    .WithBootstrapServers("foo.bootstrap.servers")
+                    .WithEnableAutoCommit(true)
+                )
                 .WithTopicSubscriberScopeFactory(A.TopicSubscriberScopeFactory.WithMessageResult(resultSpy))
                 .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(x => new UnitOfWorkStub(handlerStub)))
                 .WithMessageHandlerRegistry(messageHandlerRegistry)
@@ -127,12 +136,12 @@ namespace Dafda.Tests.Consuming
                 .Register<FooMessage, FooMessageHandler>("bar", "foo")
                 .Build();
 
-            var configuration = A.ValidConsumerConfiguration
-                .WithEnableAutoCommit(false)
-                .Build();
-
-            var sut = A.Consumer
-                .WithConfiguration(configuration)
+            var sut = new ConsumerBuilder()
+                .WithConfiguration(new ConsumerConfigurationBuilder()
+                    .WithGroupId("foo.group.id")
+                    .WithBootstrapServers("foo.bootstrap.servers")
+                    .WithEnableAutoCommit(false)
+                )
                 .WithTopicSubscriberScopeFactory(A.TopicSubscriberScopeFactory.WithMessageResult(resultSpy))
                 .WithUnitOfWorkFactory(new DefaultUnitOfWorkFactory(x => new UnitOfWorkStub(handlerStub)))
                 .WithMessageHandlerRegistry(messageHandlerRegistry)
